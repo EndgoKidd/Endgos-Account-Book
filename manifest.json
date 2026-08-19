@@ -1,0 +1,8 @@
+{
+  "name": "Endgo's Account Book",
+  "short_name": "Account Book",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#292725"
+}
