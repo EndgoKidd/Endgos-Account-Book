@@ -1,1 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endgo's Account Book</title>
 
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f4f1ea;
+    color: #292725;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "Noto Sans SC", sans-serif;
+}
+
+.app {
+    max-width: 600px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #fffdf9;
+    position: relative;
+    padding-bottom: 100px;
+}
+
+/* 顶部 */
+.header {
+    padding: 28px 22px 20px;
+}
+
+.title {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: #8a857d;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* 存款 */
+.balance-card {
+    margin: 0 18px 24px;
+    padding: 24px 22px;
+    background: #292725;
+    color: white;
+    border-radius: 20px;
+}
+
+.balance-label {
+    font-size: 13px;
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+.euro-balance {
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.rmb-balance {
+    font-size: 18px;
+    margin-top: 5px;
+    opacity: 0.7;
+}
+
+.rate {
+    font-size: 12px;
+    opacity: 0.5;
+    margin-top: 15px;
+}
+
+.balance-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 17px;
+}
+
+.balance-button {
+    padding: 9px 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-size: 13px;
+}
+
+/* 流水 */
+.transactions {
+    padding: 0 18px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.group {
+    margin-bottom: 8px;
+}
+
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.group-arrow {
+    color: #999;
+    font-size: 13px;
+    margin-right: 5px;
+}
+
+.day-group {
+    border-bottom: 1px solid #eeeae4;
+}
+
+.day-header {
+    font-size: 14px;
+    color: #77716a;
+    padding: 10px 5px;
+    cursor: pointer;
+}
+
+.transaction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 7px;
+    border-bottom: 1px solid #f1eee9;
+}
+
+.transaction-info {
+    min-width: 0;
+}
+
+.transaction-note {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transaction-date {
+    font-size: 11px;
+    color: #aaa39a;
+    margin-top: 4px;
+}
+
+.transaction-amount {
+    font-size: 15px;
+    font-weight: 600;
+    margin-left: 15px;
+    white-space: nowrap;
+}
+
+.income {
+    color: #41815c;
+}
+
+.expense {
+    color: #c45b50;
+}
+
+.empty {
+    text-align: center;
+    color: #aaa39a;
+    padding: 55px 20px;
+    font-size: 14px;
+}
+
+/* ＋按钮 */
+.add-button {
+    position: fixed;
+    right: 22px;
+    bottom: 25px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    background: #292725;
+    color: white;
+    font-size: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    z-index: 10;
+}
+
+/* 记账弹窗 */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 20;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 600px;
+    background: #fffdf9;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 22px 35px;
+}
+
+.modal-title {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.type-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.type-button {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd8d0;
+    background: white;
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+.type-button.active-income {
+    background: #e7f2ea;
+    border-color: #8eb89b;
+    color: #39714c;
+}
+
+.type-button.active-expense {
+    background: #f8e7e5;
+    border-color: #d99a93;
+    color: #a84d45;
+}
+
+.input-label {
+    display: block;
+    font-size: 12px;
+    color: #817a72;
+    margin: 14px 0 6px;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ddd8d0;
+    border-radius: 11px;
+    background: white;
+    font-size: 16px;
+    outline: none;
+}
+
+.save-button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #292725;
+    color: white;
+    font-size: 16px;
+}
+
+.cancel-button {
+    width: 100%;
+    margin-top: 9px;
+    padding: 11px;
+    border: none;
+    background: transparent;
+    color: #88827a;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <div class="title">Endgo's Account Book</div>
+        <div class="subtitle">My little money universe</div>
+    </div>
+
+    <div class="balance-card">
+
+        <div class="balance-label">
+            CURRENT SAVINGS
+        </div>
+
+        <div class="euro-balance" id="euroBalance">
+            €0.00
+        </div>
+
+        <div class="rmb-balance" id="rmbBalance">
+            ¥0.00
+        </div>
+
+        <div class="rate" id="rateText">
+            汇率：€1 = ¥7.808
+        </div>
+
+        <div class="balance-buttons">
+
+            <button
+                class="balance-button"
+                onclick="editBalance()">
+                修改存款
+            </button>
+
+            <button
+                class="balance-button"
+                onclick="editExchangeRate()">
+                修改汇率
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="transactions">
+
+        <div class="section-title">
+            流水
+        </div>
+
+        <div id="transactionList"></div>
+
+    </div>
+
+</div>
+
+
+<button
+    class="add-button"
+    onclick="openModal()">
+    ＋
+</button>
+
+
+<!-- 记账弹窗 -->
+
+<div
+    class="modal"
+    id="modal">
+
+    <div class="modal-content">
+
+        <div class="modal-title">
+            记一笔
+        </div>
+
+        <div class="type-buttons">
+
+            <button
+                id="incomeButton"
+                class="type-button"
+                onclick="setType('income')">
+                ＋ 收入
+            </button>
+
+            <button
+                id="expenseButton"
+                class="type-button active-expense"
+                onclick="setType('expense')">
+                − 支出
+            </button>
+
+        </div>
+
+        <label class="input-label">
+            金额（欧元）
+        </label>
+
+        <input
+            id="amountInput"
+            type="number"
+            inputmode="decimal"
+            placeholder="例如 25.00"
+            step="0.01">
+
+
+        <label class="input-label">
+            备注
+        </label>
+
+        <input
+            id="noteInput"
+            type="text"
+            placeholder="这笔钱是干嘛的？">
+
+
+        <label class="input-label">
+            日期
+        </label>
+
+        <input
+            id="dateInput"
+            type="date">
+
+
+        <button
+            class="save-button"
+            onclick="saveTransaction()">
+            保存
+        </button>
+
+        <button
+            class="cancel-button"
+            onclick="closeModal()">
+            取消
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let transactions =
+    JSON.parse(localStorage.getItem("transactions")) || [];
+
+let balance =
+    Number(localStorage.getItem("balance")) || 0;
+
+let exchangeRate =
+    Number(localStorage.getItem("exchangeRate")) || 7.808;
+
+let currentType = "expense";
+
+
+/* 保存数据 */
+
+function saveData() {
+
+    localStorage.setItem(
+        "transactions",
+        JSON.stringify(transactions)
+    );
+
+    localStorage.setItem(
+        "balance",
+        balance.toString()
+    );
+
+    localStorage.setItem(
+        "exchangeRate",
+        exchangeRate.toString()
+    );
+}
+
+
+/* 更新顶部余额 */
+
+function updateBalanceDisplay() {
+
+    document.getElementById("euroBalance").textContent =
+        "€" + balance.toFixed(2);
+
+    document.getElementById("rmbBalance").textContent =
+        "¥" + (balance * exchangeRate).toFixed(2);
+
+    document.getElementById("rateText").textContent =
+        "汇率：€1 = ¥" + exchangeRate.toFixed(3);
+}
+
+
+/* 修改存款 */
+
+function editBalance() {
+
+    let newBalance = prompt(
+        "请输入目前的欧元存款：",
+        balance.toFixed(2)
+    );
+
+    if (newBalance === null) {
+        return;
+    }
+
+    newBalance = Number(newBalance);
+
+    if (
+        isNaN(newBalance) ||
+        newBalance < 0
+    ) {
+        alert("请输入正确的数字。");
+        return;
+    }
+
+    balance = newBalance;
+
+    saveData();
+    updateBalanceDisplay();
+}
+
+
+/* 修改汇率 */
+
+function editExchangeRate() {
+
+    let newRate = prompt(
+        "请输入汇率：\n1 欧元 = 多少人民币？",
+        exchangeRate.toFixed(3)
+    );
+
+    if (newRate === null) {
+        return;
+    }
+
+    newRate = Number(newRate);
+
+    if (
+        isNaN(newRate) ||
+        newRate <= 0
+    ) {
+        alert("请输入正确的汇率。");
+        return;
+    }
+
+    exchangeRate = newRate;
+
+    saveData();
+    updateBalanceDisplay();
+}
+
+
+/* 打开记账 */
+
+function openModal() {
+
+    document
+        .getElementById("modal")
+        .classList.add("show");
+
+    document
+        .getElementById("amountInput")
+        .value = "";
+
+    document
+        .getElementById("noteInput")
+        .value = "";
+
+    let today =
+        new Date().toISOString().split("T")[0];
+
+    document
+        .getElementById("dateInput")
+        .value = today;
+
+    setType("expense");
+}
+
+
+/* 关闭记账 */
+
+function closeModal() {
+
+    document
+        .getElementById("modal")
+        .classList.remove("show");
+}
+
+
+/* 收入 / 支出 */
+
+function setType(type) {
+
+    currentType = type;
+
+    let income =
+        document.getElementById("incomeButton");
+
+    let expense =
+        document.getElementById("expenseButton");
+
+    income.className = "type-button";
+    expense.className = "type-button";
+
+    if (type === "income") {
+
+        income.classList.add(
+            "active-income"
+        );
+
+    } else {
+
+        expense.classList.add(
+            "active-expense"
+        );
+    }
+}
+
+
+/* 保存流水 */
+
+function saveTransaction() {
+
+    let amount =
+        Number(
+            document
+                .getElementById("amountInput")
+                .value
+        );
+
+    let note =
+        document
+            .getElementById("noteInput")
+            .value
+            .trim();
+
+    let date =
+        document
+            .getElementById("dateInput")
+            .value;
+
+    if (
+        !amount ||
+        amount <= 0
+    ) {
+        alert("请输入金额。");
+        return;
+    }
+
+    if (!date) {
+        alert("请选择日期。");
+        return;
+    }
+
+    if (!note) {
+        note = "未填写备注";
+    }
+
+    let transaction = {
+
+        id: Date.now(),
+
+        amount: amount,
+
+        type: currentType,
+
+        note: note,
+
+        date: date
+    };
+
+    transactions.push(transaction);
+
+
+    if (currentType === "income") {
+
+        balance += amount;
+
+    } else {
+
+        balance -= amount;
+
+    }
+
+
+    saveData();
+
+    updateBalanceDisplay();
+
+    renderTransactions();
+
+    closeModal();
+}
+
+
+/* 显示流水 */
+
+function renderTransactions() {
+
+    let container =
+        document.getElementById(
+            "transactionList"
+        );
+
+
+    if (transactions.length === 0) {
+
+        container.innerHTML =
+            '<div class="empty">' +
+            '还没有流水。<br>' +
+            '点击下面的 ＋ 开始记第一笔。' +
+            '</div>';
+
+        return;
+    }
+
+
+    let sorted =
+        [...transactions].sort(
+            (a, b) =>
+                b.date.localeCompare(a.date)
+        );
+
+
+    let years = {};
+
+
+    sorted.forEach(t => {
+
+        let year =
+            t.date.slice(0, 4);
+
+        let month =
+            t.date.slice(0, 7);
+
+
+        if (!years[year]) {
+            years[year] = {};
+        }
+
+
+        if (!years[year][month]) {
+            years[year][month] = [];
+        }
+
+
+        years[year][month].push(t);
+
+    });
+
+
+    let html = "";
+
+
+    Object.keys(years)
+        .sort((a, b) =>
+            b.localeCompare(a)
+        )
+        .forEach(year => {
+
+            html += `
+                <div class="group">
+
+                    <div
+                        class="group-header"
+                        onclick="toggleGroup('year-${year}')">
+
+                        <span>
+                            <span class="group-arrow">
+                                ▼
+                            </span>
+
+                            ${year}年
+                        </span>
+
+                    </div>
+
+                    <div id="year-${year}">
+            `;
+
+
+            Object.keys(years[year])
+                .sort((a, b) =>
+                    b.localeCompare(a)
+                )
+                .forEach(month => {
+
+                    let monthNumber =
+                        Number(
+                            month.slice(5, 7)
+                        );
+
+                    let monthId =
+                        "month-" +
+                        month.replace("-", "");
+
+
+                    html += `
+                        <div class="group">
+
+                            <div
+                                class="group-header"
+                                onclick="toggleGroup('${monthId}')">
+
+                                <span>
+                                    <span class="group-arrow">
+                                        ▼
+                                    </span>
+
+                                    ${monthNumber}月
+                                </span>
+
+                            </div>
+
+                            <div id="${monthId}">
+                    `;
+
+
+                    let days = {};
+
+
+                    years[year][month]
+                        .forEach(t => {
+
+                            if (!days[t.date]) {
+                                days[t.date] = [];
+                            }
+
+                            days[t.date].push(t);
+
+                        });
+
+
+                    Object.keys(days)
+                        .sort((a, b) =>
+                            b.localeCompare(a)
+                        )
+                        .forEach(day => {
+
+                            let dayId =
+                                "day-" +
+                                day.replaceAll("-", "");
+
+                            let dateText =
+                                formatDate(day);
+
+
+                            html += `
+                                <div class="day-group">
+
+                                    <div
+                                        class="day-header"
+                                        onclick="toggleGroup('${dayId}')">
+
+                                        ▼ ${dateText}
+
+                                    </div>
+
+                                    <div id="${dayId}">
+                            `;
+
+
+                            days[day]
+                                .forEach(t => {
+
+                                    let sign =
+                                        t.type === "income"
+                                        ? "+"
+                                        : "−";
+
+
+                                    let className =
+                                        t.type === "income"
+                                        ? "income"
+                                        : "expense";
+
+
+                                    html += `
+                                        <div class="transaction">
+
+                                            <div class="transaction-info">
+
+                                                <div class="transaction-note">
+                                                    ${escapeHtml(t.note)}
+                                                </div>
+
+                                                <div class="transaction-date">
+                                                    ${t.date}
+                                                </div>
+
+                                            </div>
+
+
+                                            <div
+                                                class="transaction-amount ${className}">
+
+                                                ${sign}
+                                                €${t.amount.toFixed(2)}
+
+                                            </div>
+
+                                        </div>
+                                    `;
+
+                                });
+
+
+                            html += `
+                                    </div>
+
+                                </div>
+                            `;
+
+                        });
+
+
+                    html += `
+                            </div>
+
+                        </div>
+                    `;
+
+                });
+
+
+            html += `
+                    </div>
+
+                </div>
+            `;
+
+        });
+
+
+    container.innerHTML = html;
+}
+
+
+/* 折叠 / 展开 */
+
+function toggleGroup(id) {
+
+    let element =
+        document.getElementById(id);
+
+
+    if (!element) {
+        return;
+    }
+
+
+    if (
+        element.style.display ===
+        "none"
+    ) {
+
+        element.style.display =
+            "block";
+
+    } else {
+
+        element.style.display =
+            "none";
+
+    }
+}
+
+
+/* 日期格式 */
+
+function formatDate(dateString) {
+
+    let parts =
+        dateString.split("-");
+
+    return (
+        parts[1] +
+        "月" +
+        parts[2] +
+        "日"
+    );
+}
+
+
+/* 防止备注里的特殊字符破坏页面 */
+
+function escapeHtml(text) {
+
+    let div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+/* 启动 */
+
+updateBalanceDisplay();
+
+renderTransactions();
+
+</script>
+
+</body>
+</html>
